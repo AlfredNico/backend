@@ -1,4 +1,11 @@
+api_login_check:
+  path: /api/login_check
+
 movie:
   type     : rest
   resource : App\Controller\MovieController
   prefix   : /api/
+
+user:
+  type     : rest
+  resource : App\Controller\UserController
