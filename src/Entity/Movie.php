@@ -6,6 +6,7 @@ use App\Repository\MovieRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @ORM\Entity(repositoryClass=MovieRepository::class)
@@ -18,13 +19,12 @@ class Movie
     use Timestamps; //include timestamps
 
     /**
-     * @var integer
+     * @var uuid
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="_movie_id", unique=true)
+     * @ORM\GeneratedValue(strategy="UUID")
+     * @ORM\Column(type="uuid", name="_movie_id", unique=true)
      */
-    private int $_movie_id = 0;
-
+    private $_movie_id;
     /**
      * @var string
      * 
@@ -54,8 +54,11 @@ class Movie
      */
     private string $movieImgURL = "movie_img.jpeg";
 
+    public function __construct() {
+        $this->_movie_id = Uuid::v4();
+    }
 
-    public function getMovieID(): ?int
+    public function getMovieID(): ?Uuid
     {
         return $this->_movie_id;
     }
