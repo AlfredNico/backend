@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Movie;
+use App\Entity\User;
 use App\Repository\MovieRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Request\ParamFetcher;
@@ -14,22 +16,22 @@ use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Movie controller
- * 
- * @Rest\Route("/api/")
  */
 class MovieController extends AbstractFOSRestController
 {
 
     private $movieRepo;
+    private $userRepo;
     private $em;
 
-    public function __construct(MovieRepository $movieRepo = null, EntityManagerInterface $em) {
+    public function __construct(MovieRepository $movieRepo = null, EntityManagerInterface $em, UserRepository $userRepo) {
         $this->movieRepo = $movieRepo;
+        $this->userRepo = $userRepo;
         $this->em = $em;
     }
 
     /**
-     * get all movies of all movies
+     * get all movies
      * 
      * @return Movie[]
      */
@@ -41,9 +43,26 @@ class MovieController extends AbstractFOSRestController
         );
     }
 
+      /**
+     * get all movies by users
+     * 
+     * @Rest\Get("users/{_user_id}/movies")
+     * @return Movie[]
+     */
+    public function getMoviesByUser(User $user)
+    {
+        dd($this->movieRepo->findBy(['user' => $user->getUserID()]) );
+
+        return $this->view(
+            $this->movieRepo->findAll(),
+            Response::HTTP_OK
+        );
+    }
+
     /**
      * create new movie
      * 
+     * @Rest\RequestParam(name="user", description="user movie", nullable=false)
      * @Rest\FileParam(name="imageFile", description="background for movie", nullable=true, image=true)
      * @Rest\RequestParam(name="title", description="title movie", nullable=false)
      * @Rest\RequestParam(name="description", description="description movie", nullable=false)
@@ -52,10 +71,13 @@ class MovieController extends AbstractFOSRestController
     public function postMovieAction(ParamFetcher $paramFetcher)
     {
         $title = ($paramFetcher->get('title'));
+        $user = trim($paramFetcher->get('user')) !== ""
+            ? $this->userRepo->findOneBy(['_user_id' => $paramFetcher->get('user')])
+            : null;
         $description = ($paramFetcher->get('description'));
         $file = ($paramFetcher->get('imageFile'));
 
-        if ($title) {
+        if (!empty(trim($title)) && !is_null($user)) {
             $movie = new Movie();
             // File System genereates
             if ($file) {
@@ -69,6 +91,7 @@ class MovieController extends AbstractFOSRestController
             }
             $movie->setTitle($title);
             $movie->setDescription($description);
+            $movie->setUser($user);
 
             $this->em->persist($movie);
             $this->em->flush();

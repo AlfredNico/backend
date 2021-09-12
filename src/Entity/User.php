@@ -1,16 +1,22 @@
 <?php
+declare(strict_types=1);
+
 
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\HasLifecycleCallbacks()
+ * @ORM\Table(name="users")
  */
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -21,20 +27,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="uuid", name="_user_id")
+     * @Groups({"public"})
      */
-    private $_user_id;
+    private Uuid $_user_id; 
 
     /**
      * @var string
+     * 
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups({"public"})
      */
-    private $email;
+    private string $email;
 
     /**
      * @var array
+     * 
      * @ORM\Column(type="json", name="user_roles")
+     * @Groups({"public"})
      */
-    private $roles = ['ROLE_USER'];
+    private array $roles = ['ROLE_USER'];
 
     /**
      * @var string The hashed password
@@ -42,8 +53,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $password;
 
+    // ================================= RELATION CLASS MOVIE =========================
+    /**
+     * @var Collection<Uuid, Comment>
+     * @ORM\OneToMany(targetEntity=Movie::class, mappedBy="user", orphanRemoval=true)
+     */
+    private Collection $movies;
+
     public function __construct() {
         $this->_user_id = Uuid::v4();
+        $this->movies = new ArrayCollection();
     }
 
     public function getUserID(): ?Uuid
@@ -133,5 +152,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    // ================================= RELATION CLASS MOVIE getter & setter =========================
+    /**
+     * @return Collection|Movie[]
+     */
+    public function getMovies(): Collection
+    {
+        return $this->movies;
+    }
+
+    public function addMovie(Movie $movie): self
+    {
+        if (!$this->movies->contains($movie)) {
+            $this->movies[] = $movie;
+            $movie->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMovie(Movie $movie): self
+    {
+        if ($this->movies->removeElement($movie)) {
+            // set the owning side to null (unless already changed)
+            if ($movie->getUser() === $this) {
+                $movie->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }

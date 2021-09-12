@@ -3,42 +3,36 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations\RequestParam;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Exception;
+use FOS\RestBundle\Context\Context;
 
 class UserController extends AbstractFOSRestController
 {
     private $em;
-    private $hasherPassword;
-    public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $hasherPassword) {
+    private $userRepo;
+
+    public function __construct(EntityManagerInterface $em, UserRepository $userRepo) {
         $this->em = $em;
-        $this->hasherPassword = $hasherPassword;
+        $this->userRepo = $userRepo;
     }
 
-
     /**
-     * create new USER
-     * 
-     * @Rest\RequestParam(name="username", description="username user value", nullable=false)
-     * @Rest\RequestParam(name="password", description="password user value", nullable=false)
-     * @param ParamFetcher $paramFetcher
-     * @Rest\Post("registration")
+     * Get all users
      */
-    public function postUser(ParamFetcher $paramFetcher)
+    public function getUsersAction()
     {
-        $user = new User();
-        $user->setEmail($paramFetcher->get('username'));
-        $user ->setPassword(
-            $this->hasherPassword->hashPassword($user, $paramFetcher->get('password'))
+        return $this->view(
+            $this->userRepo->findAll(),
+            Response::HTTP_OK
+        )->setContext(
+            (new Context())->setGroups(['public'])
         );
-
-        $this->em->persist($user);
-        $this->em->flush();
-        return $this->view(['message' => "user created successfully."], Response::HTTP_OK);
     }
 }

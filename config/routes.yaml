@@ -1,6 +1,11 @@
 api_login_check:
   path: /api/login_check
 
+comment:
+  type     : rest
+  resource : App\Controller\CommentController
+  prefix   : /api/
+
 movie:
   type     : rest
   resource : App\Controller\MovieController
@@ -9,3 +14,4 @@ movie:
 user:
   type     : rest
   resource : App\Controller\UserController
+  prefix   : /api/
