@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 
@@ -29,7 +30,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="uuid", name="_user_id")
      * @Groups({"public"})
      */
-    private Uuid $_user_id; 
+    private Uuid $_user_id;
 
     /**
      * @var string
@@ -53,16 +54,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $password;
 
-    // ================================= RELATION CLASS MOVIE =========================
     /**
-     * @var Collection<Uuid, Comment>
-     * @ORM\OneToMany(targetEntity=Movie::class, mappedBy="user", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Article::class, mappedBy="user")
      */
-    private Collection $movies;
+    private $article;
 
-    public function __construct() {
+    // ================================= RELATION CLASS MOVIE =========================
+
+    public function __construct()
+    {
         $this->_user_id = Uuid::v4();
-        $this->movies = new ArrayCollection();
+        $this->article = new ArrayCollection();
     }
 
     public function getUserID(): ?Uuid
@@ -155,30 +157,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     // ================================= RELATION CLASS MOVIE getter & setter =========================
+
     /**
-     * @return Collection|Movie[]
+     * @return Collection|Article[]
      */
-    public function getMovies(): Collection
+    public function getArticle(): Collection
     {
-        return $this->movies;
+        return $this->article;
     }
 
-    public function addMovie(Movie $movie): self
+    public function addArticle(Article $article): self
     {
-        if (!$this->movies->contains($movie)) {
-            $this->movies[] = $movie;
-            $movie->setUser($this);
+        if (!$this->article->contains($article)) {
+            $this->article[] = $article;
+            $article->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeMovie(Movie $movie): self
+    public function removeArticle(Article $article): self
     {
-        if ($this->movies->removeElement($movie)) {
+        if ($this->article->removeElement($article)) {
             // set the owning side to null (unless already changed)
-            if ($movie->getUser() === $this) {
-                $movie->setUser(null);
+            if ($article->getUser() === $this) {
+                $article->setUser(null);
             }
         }
 

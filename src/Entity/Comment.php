@@ -28,10 +28,11 @@ class Comment
     private string $description;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Movie::class, inversedBy="comments", cascade={"persist"})
-     * @ORM\JoinColumn(nullable=false, name="movie_id", referencedColumnName="_movie_id")
+     * @ORM\ManyToOne(targetEntity=Article::class, inversedBy="comment")
+     * @ORM\JoinColumn(nullable=false, name="article_id", referencedColumnName="_article_id")
      */
-    private Movie $movie;
+    private $article;
+
 
     public function getCommentID(): ?Uuid
     {
@@ -50,14 +51,14 @@ class Comment
         return $this;
     }
 
-    public function getMovie(): ?Movie
+    public function getArticle(): ?Article
     {
-        return $this->movie;
+        return $this->article;
     }
 
-    public function setMovie(?Movie $movie): self
+    public function setArticle(?Article $article): self
     {
-        $this->movie = $movie;
+        $this->article = $article;
 
         return $this;
     }

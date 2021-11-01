@@ -29,11 +29,13 @@ class RegistrationController extends AbstractFOSRestController
     /**
      * Registration new user
      * 
-     * @Route("/registration", name="registration")
+     * @Route("/register", name="registration")
      * @Method({"POST"})
      */
     public function index(Request $request)
     {
+
+        // dd(bin2hex(random_bytes(20)));
         $email = $request->get('email');
         $password = $request->get('password');
         $roles = !empty($request->get('roles')) 
