@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Article;
 use App\Repository\ArticleRepository;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,5 +22,18 @@ class ArticleController extends AbstractFOSRestController
             $this->articleRepo->findAll(),
             Response::HTTP_OK
         );
+    }
+
+    /**
+     * get one moveie by id
+     * 
+     * @param Article $article
+     */
+    public function getArticleAction(Article $article = null)
+    {
+        if (is_null($article)) {
+            return $this->view(['message' => "id movie undefined."], Response::HTTP_NOT_FOUND);
+        }
+        return $this->view($article, Response::HTTP_OK);
     }
 }
