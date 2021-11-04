@@ -1,6 +1,16 @@
 api_login_check:
   path: /api/login_check
 
+api_login:
+  path: /api/login
+  controller: App\Controller\AuthController::getTokenUser
+  methods: POST
+
+api_register:
+  path: /api/register
+  controller: App\Controller\RegistrationController::registration
+  methods: POST
+
 gesdinet_jwt_refresh_token:
   path: api/token/refresh
   controller: gesdinet.jwtrefreshtoken::refresh
@@ -19,3 +29,5 @@ user:
   type     : rest
   resource : App\Controller\UserController
   prefix   : /api/
+
+
